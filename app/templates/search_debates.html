@@ -1,0 +1,511 @@
+{% extends "base.html" %}
+
+{% block title %}搜尋辯論 - 懂事論壇{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- 左側搜尋與篩選欄 -->
+        <div class="col-lg-3">
+            <div class="search-sidebar">
+                <!-- 搜尋框 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="fas fa-search me-2"></i>搜尋辯論</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" id="searchForm">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" name="q" 
+                                       value="{{ search_query or '' }}" 
+                                       placeholder="輸入關鍵字...">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>搜尋
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 篩選條件 -->
+                <div class="card sticky-top" style="top: 1rem;">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-filter me-2"></i>篩選條件</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" id="filterForm">
+                            <!-- 保持搜尋關鍵字 -->
+                            {% if search_query %}
+                            <input type="hidden" name="q" value="{{ search_query }}">
+                            {% endif %}
+
+                            <!-- 狀態篩選 -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-3">辯論狀態</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="status" value="waiting" 
+                                           id="statusWaiting" {{ 'checked' if 'waiting' in selected_filters.status }}>
+                                    <label class="form-check-label" for="statusWaiting">
+                                        <span class="badge bg-warning text-dark me-2">等待對手</span>
+                                        <small class="text-muted">可加入</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="status" value="ongoing" 
+                                           id="statusOngoing" {{ 'checked' if 'ongoing' in selected_filters.status }}>
+                                    <label class="form-check-label" for="statusOngoing">
+                                        <span class="badge bg-success me-2">進行中</span>
+                                        <small class="text-muted">觀戰</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="status" value="judging" 
+                                           id="statusJudging" {{ 'checked' if 'judging' in selected_filters.status }}>
+                                    <label class="form-check-label" for="statusJudging">
+                                        <span class="badge bg-info me-2">評審中</span>
+                                        <small class="text-muted">等待結果</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="status" value="completed" 
+                                           id="statusCompleted" {{ 'checked' if 'completed' in selected_filters.status }}>
+                                    <label class="form-check-label" for="statusCompleted">
+                                        <span class="badge bg-secondary me-2">已完成</span>
+                                        <small class="text-muted">查看結果</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 分類篩選 -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-3">主題分類</h6>
+                                {% for category in categories %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="category" value="{{ category.name }}" 
+                                           id="category{{ loop.index }}" {{ 'checked' if category.name in selected_filters.category }}>
+                                    <label class="form-check-label" for="category{{ loop.index }}">
+                                        {{ category.name }} 
+                                        <small class="text-muted">({{ category.count }})</small>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- 等級篩選 -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-3">參與者等級</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="level" value="all" 
+                                           id="levelAll" {{ 'checked' if selected_filters.level == 'all' or not selected_filters.level }}>
+                                    <label class="form-check-label" for="levelAll">不限制</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="level" value="beginner" 
+                                           id="levelBeginner" {{ 'checked' if selected_filters.level == 'beginner' }}>
+                                    <label class="form-check-label" for="levelBeginner">
+                                        新手 <small class="text-muted">(Lv.1-5)</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="level" value="intermediate" 
+                                           id="levelIntermediate" {{ 'checked' if selected_filters.level == 'intermediate' }}>
+                                    <label class="form-check-label" for="levelIntermediate">
+                                        進階 <small class="text-muted">(Lv.6-15)</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="level" value="advanced" 
+                                           id="levelAdvanced" {{ 'checked' if selected_filters.level == 'advanced' }}>
+                                    <label class="form-check-label" for="levelAdvanced">
+                                        專家 <small class="text-muted">(Lv.16+)</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-outline-primary">套用篩選</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">清除篩選</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要內容區 -->
+        <div class="col-lg-9">
+            <!-- 頂部工具列 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">搜尋結果</h2>
+                    <p class="text-muted mb-0">
+                        {% if search_query %}
+                            關於「{{ search_query }}」找到 {{ debates|length }} 場辯論
+                        {% else %}
+                            共找到 {{ debates|length }} 場辯論，總計 {{ total_debates }} 場
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <small class="text-muted me-2">排序：</small>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="sort" id="sortNewest" 
+                               {{ 'checked' if sort_by == 'newest' or not sort_by }} autocomplete="off">
+                        <label class="btn btn-outline-primary" for="sortNewest">最新</label>
+                        
+                        <input type="radio" class="btn-check" name="sort" id="sortHot" 
+                               {{ 'checked' if sort_by == 'hot' }} autocomplete="off">
+                        <label class="btn btn-outline-primary" for="sortHot">熱門</label>
+                        
+                        <input type="radio" class="btn-check" name="sort" id="sortUrgent" 
+                               {{ 'checked' if sort_by == 'urgent' }} autocomplete="off">
+                        <label class="btn btn-outline-primary" for="sortUrgent">緊急</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜尋建議 -->
+            {% if search_query and not debates %}
+            <div class="alert alert-light border">
+                <h5 class="alert-heading">找不到相關辯論</h5>
+                <p class="mb-3">試試以下方式：</p>
+                <ul class="mb-3">
+                    <li>檢查關鍵字拼寫</li>
+                    <li>使用更廣泛的關鍵字</li>
+                    <li>嘗試不同的分類</li>
+                </ul>
+                <a href="{{ url_for('main.create_debate_page') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>發起新辯論
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- 辯論列表 -->
+            <div class="row g-4">
+                {% for debate in debates %}
+                <div class="col-12">
+                    <div class="card debate-result-card shadow-sm {{ 'border-warning' if debate.status == 'waiting' else '' }}">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <!-- 標題與狀態 -->
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-2">
+                                                {% if debate.status == 'waiting' %}
+                                                    <span class="badge bg-warning text-dark me-2">
+                                                        <i class="fas fa-clock me-1"></i>等待對手
+                                                    </span>
+                                                {% elif debate.status == 'ongoing' %}
+                                                    <span class="badge bg-success me-2">
+                                                        <i class="fas fa-fire me-1"></i>進行中
+                                                    </span>
+                                                {% elif debate.status == 'judging' %}
+                                                    <span class="badge bg-info me-2">
+                                                        <i class="fas fa-gavel me-1"></i>評審中
+                                                    </span>
+                                                {% elif debate.status == 'completed' %}
+                                                    <span class="badge bg-secondary me-2">
+                                                        <i class="fas fa-check me-1"></i>已完成
+                                                    </span>
+                                                {% endif %}
+                                                
+                                                <span class="badge bg-light text-dark me-2">{{ debate.category }}</span>
+                                                
+                                                {% if debate._is_urgent %}
+                                                    <span class="badge bg-danger me-2">
+                                                        <i class="fas fa-exclamation me-1"></i>緊急
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <h4 class="card-title mb-2">
+                                                <a href="{{ url_for('main.debate_detail', debate_id=debate.id) }}" 
+                                                   class="text-decoration-none text-dark">{{ debate.title }}</a>
+                                            </h4>
+                                            
+                                            {% if debate.description %}
+                                            <p class="text-muted mb-3">
+                                                {{ debate.description[:150] }}{% if debate.description|length > 150 %}...{% endif %}
+                                            </p>
+                                            {% endif %}
+
+                                            <!-- 基本信息 -->
+                                            <div class="d-flex align-items-center text-muted small">
+                                                <div class="me-4">
+                                                    <i class="fas fa-user me-1"></i>
+                                                    {{ debate.creator.username }}
+                                                    <span class="badge bg-info ms-1">Lv.{{ debate.creator.level or 1 }}</span>
+                                                </div>
+                                                <div class="me-4">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    {{ debate.created_at.strftime('%m-%d %H:%M') }}
+                                                </div>
+                                                {% if debate.status == 'ongoing' %}
+                                                <div class="me-4 text-warning">
+                                                    <i class="fas fa-hourglass-half me-1"></i>
+                                                    剩餘：{{ debate.time_remaining }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 參與者信息 -->
+                                    <div class="participants-info">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="participant-card bg-success bg-opacity-10 border border-success border-opacity-25">
+                                                    <div class="participant-header">
+                                                        <i class="fas fa-thumbs-up text-success me-1"></i>
+                                                        <span class="fw-bold text-success">正方</span>
+                                                    </div>
+                                                    {% if debate.pro_participant %}
+                                                        <div class="participant-name">
+                                                            {{ debate.pro_participant.username }}
+                                                            <span class="badge bg-info ms-1">Lv.{{ debate.pro_participant.level or 1 }}</span>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="text-muted">等待參與者...</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="participant-card bg-danger bg-opacity-10 border border-danger border-opacity-25">
+                                                    <div class="participant-header">
+                                                        <i class="fas fa-thumbs-down text-danger me-1"></i>
+                                                        <span class="fw-bold text-danger">反方</span>
+                                                    </div>
+                                                    {% if debate.con_participant %}
+                                                        <div class="participant-name">
+                                                            {{ debate.con_participant.username }}
+                                                            <span class="badge bg-info ms-1">Lv.{{ debate.con_participant.level or 1 }}</span>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="text-muted">等待參與者...</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 右側動作區 -->
+                                <div class="col-md-4">
+                                    <div class="d-flex flex-column h-100">
+                                        <!-- 統計資訊 -->
+                                        <div class="stats-grid mb-3">
+                                            <div class="stat-item text-center">
+                                                <div class="stat-number text-primary">{{ debate.views }}</div>
+                                                <div class="stat-label">觀看</div>
+                                            </div>
+                                            <div class="stat-item text-center">
+                                                <div class="stat-number text-success">{{ debate._arguments_count }}</div>
+                                                <div class="stat-label">論述</div>
+                                            </div>
+                                            <div class="stat-item text-center">
+                                                <div class="stat-number text-info">{{ debate._followers }}</div>
+                                                <div class="stat-label">關注</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 動作按鈕 -->
+                                        <div class="mt-auto">
+                                            {% if debate.status == 'waiting' and session.get('user_id') and session.get('user_id') != debate.creator_id %}
+                                                {% if not debate.pro_participant %}
+                                                    <button class="btn btn-success btn-sm w-100 mb-2" 
+                                                            onclick="joinDebate({ debateId:debate.id }, 'pro')">
+                                                        <i class="fas fa-plus me-1"></i>加入正方
+                                                    </button>
+                                                {% endif %}
+                                                {% if not debate.con_participant %}
+                                                    <button class="btn btn-danger btn-sm w-100 mb-2" 
+                                                            onclick="joinDebate({ debateId:debate.id }, 'con')">
+                                                        <i class="fas fa-plus me-1"></i>加入反方
+                                                    </button>
+                                                {% endif %}
+                                            {% endif %}
+                                            
+                                            <a href="{{ url_for('main.debate_detail', debate_id=debate.id) }}" 
+                                               class="btn btn-primary btn-sm w-100">
+                                                <i class="fas fa-arrow-right me-1"></i>進入辯論
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- 分頁 -->
+            {% if total_pages > 1 %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if current_page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.search_debates', page=current_page-1, **request.args) }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in range(max(1, current_page-2), min(total_pages+1, current_page+3)) %}
+                        <li class="page-item {{ 'active' if page_num == current_page }}">
+                            <a class="page-link" href="{{ url_for('main.search_debates', page=page_num, **request.args) }}">{{ page_num }}</a>
+                        </li>
+                    {% endfor %}
+                    
+                    {% if current_page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.search_debates', page=current_page+1, **request.args) }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            <!-- 快捷操作 -->
+            {% if session.get('user_id') %}
+            <div class="text-center mt-4">
+                <a href="{{ url_for('main.create_debate_page') }}" class="btn btn-success btn-lg">
+                    <i class="fas fa-plus me-2"></i>發起新辯論
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.search-sidebar .card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.debate-result-card {
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.debate-result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.participant-card {
+    padding: 12px;
+    border-radius: 8px;
+    height: 100%;
+}
+
+.participant-header {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.participant-name {
+    font-weight: 500;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.stat-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.form-check-label {
+    display: block;
+    width: 100%;
+}
+
+.form-check {
+    margin-bottom: 8px;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+}
+</style>
+
+<script>
+// 加入辯論
+function joinDebate(debateId, position) {
+    if (confirm(`確定要以${position === 'pro' ? '正方' : '反方'}身份加入這場辯論嗎？`)) {
+        fetch('{{ url_for("main.join_debate") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                debate_id: debateId,
+                position: position
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('成功加入辯論！');
+                location.reload();
+            } else {
+                alert('加入失敗：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('操作失敗，請稍後再試');
+        });
+    }
+}
+
+// 清除篩選
+function clearFilters() {
+    const form = document.getElementById('filterForm');
+    const inputs = form.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+    inputs.forEach(input => {
+        if (input.value === 'all') {
+            input.checked = true;
+        } else {
+            input.checked = false;
+        }
+    });
+    form.submit();
+}
+
+// 排序功能
+document.querySelectorAll('input[name="sort"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const sortBy = this.id.replace('sort', '').toLowerCase();
+        const url = new URL(window.location);
+        url.searchParams.set('sort', sortBy);
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+    });
+});
+
+// 自動提交篩選表單
+document.getElementById('filterForm').addEventListener('change', function() {
+    clearTimeout(this.submitTimer);
+    this.submitTimer = setTimeout(() => {
+        this.submit();
+    }, 500);
+});
+</script>
+{% endblock %}

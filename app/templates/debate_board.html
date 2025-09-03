@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}辯論看板 - 懂事論壇{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 頂部橫幅 -->
+    <div class="hero-banner bg-gradient text-white mb-4 rounded" 
+         style="background: linear-gradient(135deg, #2c5aa0 0%, #1e3a8a 100%); padding: 60px 0;">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-3">辯論看板</h1>
+            <p class="lead mb-4">發現精彩議題，參與理性辯論</p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{{ url_for('main.search_debates') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-search me-2"></i>搜尋辯論
+                </a>
+                {% if session.get('user_id') %}
+                <a href="{{ url_for('main.create_debate_page') }}" class="btn btn-warning btn-lg">
+                    <i class="fas fa-plus me-2"></i>發起辯論
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 快速統計 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center border-0 bg-light">
+                <div class="card-body">
+                    <div class="text-primary mb-2">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h4 class="text-primary">{{ waiting_count or 12 }}</h4>
+                    <small class="text-muted">等待對手</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-0 bg-light">
+                <div class="card-body">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-fire fa-2x"></i>
+                    </div>
+                    <h4 class="text-success">{{ ongoing_count or 8 }}</h4>
+                    <small class="text-muted">進行中</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-0 bg-light">
+                <div class="card-body">
+                    <div class="text-info mb-2">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <h4 class="text-info">{{ total_participants or 245 }}</h4>
+                    <small class="text-muted">參與者</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-0 bg-light">
+                <div class="card-body">
+                    <div class="text-warning mb-2">
+                        <i class="fas fa-trophy fa-2x"></i>
+                    </div>
+                    <h4 class="text-warning">{{ completed_count or 156 }}</h4>
+                    <small class="text-muted">已完成</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 熱門辯論 -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold">🔥 熱門辯論</h2>
+                <p class="text-muted mb-0">當前最受關注的辯論議題</p>
+            </div>
+            <a href="{{ url_for('main.search_debates', sort='hot') }}" class="btn btn-outline-primary">
+                查看更多 <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for debate in hot_debates[:4] %}
+            <div class="col-lg-6">
+                <div class="card debate-card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-{{ 'warning' if debate.status == 'waiting' else ('success' if debate.status == 'ongoing' else 'secondary') }} text-dark">
+                                {{ '等待對手' if debate.status == 'waiting' else ('進行中' if debate.status == 'ongoing' else '已完成') }}
+                            </span>
+                            <small class="text-muted">
+                                <i class="fas fa-eye me-1"></i>{{ debate.views or 42 }}
+                            </small>
+                        </div>
+                        
+                        <h5 class="card-title mb-3">
+                            <a href="{{ url_for('main.debate_detail', debate_id=debate.id) }}" 
+                               class="text-decoration-none text-dark">{{ debate.title }}</a>
+                        </h5>
+                        
+                        <div class="participants-preview mb-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-success fw-bold d-block">正方</small>
+                                    <span class="text-muted small">
+                                        {{ debate.pro_participant.username if debate.pro_participant else '等待中...' }}
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-danger fw-bold d-block">反方</small>
+                                    <span class="text-muted small">
+                                        {{ debate.con_participant.username if debate.con_participant else '等待中...' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-tag me-1"></i>{{ debate.category }}
+                            </small>
+                            <a href="{{ url_for('main.debate_detail', debate_id=debate.id) }}" 
+                               class="btn btn-primary btn-sm">進入辯論</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- 最新辯論 -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold">⭐ 最新辯論</h2>
+                <p class="text-muted mb-0">剛剛發起的新鮮議題</p>
+            </div>
+            <a href="{{ url_for('main.search_debates', sort='newest') }}" class="btn btn-outline-primary">
+                查看更多 <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            {% for debate in latest_debates[:6] %}
+            <div class="col-lg-4">
+                <div class="card debate-card-small border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="card-title mb-2">
+                                    <a href="{{ url_for('main.debate_detail', debate_id=debate.id) }}" 
+                                       class="text-decoration-none">{{ debate.title[:50] }}...</a>
+                                </h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>{{ debate.creator.username }}
+                                    </small>
+                                    <span class="badge bg-light text-dark">{{ debate.category }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- 分類導航 -->
+    <section class="mb-5">
+        <h2 class="fw-bold mb-4">📂 分類瀏覽</h2>
+        <div class="row g-3">
+            {% set category_colors = ['primary', 'success', 'info', 'warning', 'danger', 'secondary', 'dark', 'light'] %}
+            {% for category in categories %}
+            <div class="col-md-3">
+                <a href="{{ url_for('main.search_debates', category=category.name) }}" 
+                   class="card category-card text-decoration-none border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-{{ category_colors[loop.index0 % category_colors|length] }} mb-2">
+                            <i class="fas fa-folder fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="text-muted mb-0">{{ category.count }} 場辯論</p>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+.hero-banner {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".1" fill="%23FFFFFF"></path></svg>') no-repeat bottom;
+    background-size: cover;
+}
+
+.debate-card {
+    transition: all 0.3s ease;
+}
+
+.debate-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.debate-card-small {
+    transition: all 0.2s ease;
+}
+
+.debate-card-small:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.category-card {
+    transition: all 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+}
+
+.participants-preview {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}辯手大廳 - 懂事論壇{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 當前議題置頂訊息 -->
+    {% if current_debates %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-fire me-3 text-danger fs-4"></i>
+                    <div class="flex-grow-1">
+                        <h5 class="alert-heading mb-2">🔥 熱門辯論進行中</h5>
+                        <div class="row">
+                            {% for debate in current_debates[:2] %}
+                            <div class="col-md-6">
+                                <div class="border-start border-3 border-warning ps-3 mb-2">
+                                    <h6 class="mb-1">{{ debate.title }}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-users me-1"></i>{{ debate.participants_count }}人參與
+                                        <i class="fas fa-clock ms-2 me-1"></i>剩餘 {{ debate.time_remaining }}
+                                    </small>
+                                    <div class="mt-1">
+                                        <a href="{{ url_for('main.debate_detail', debate_id=debate.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">立即參與</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- 左側邊欄 - 辯手排行榜 -->
+        <div class="col-lg-3">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-crown me-2"></i>本月辯手排行</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% for debater in top_debaters %}
+                    <div class="d-flex align-items-center p-3 border-bottom">
+                        <div class="ranking-badge me-3">
+                            {% if loop.index == 1 %}
+                                <span class="badge bg-warning text-dark fs-6">🥇</span>
+                            {% elif loop.index == 2 %}
+                                <span class="badge bg-secondary fs-6">🥈</span>
+                            {% elif loop.index == 3 %}
+                                <span class="badge bg-warning text-white fs-6">🥉</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark">{{ loop.index }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ debater.username }}</h6>
+                            <small class="text-muted">
+                                <i class="fas fa-star text-warning me-1"></i>{{ debater.rating }}分
+                                <span class="ms-2">{{ debater.win_rate }}% 勝率</span>
+                            </small>
+                        </div>
+                        <div class="level-badge">
+                            <span class="badge bg-info">Lv.{{ debater.level }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 快速統計 -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">今日統計</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ today_stats.active_debates }}</h4>
+                            <small class="text-muted">進行中</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">{{ today_stats.completed_today }}</h4>
+                            <small class="text-muted">今日完成</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中間主要內容 - 大廳討論 -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-comments me-2"></i>辯手大廳</h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="hallFilter" id="all" autocomplete="off" checked>
+                        <label class="btn btn-outline-primary" for="all">全部</label>
+                        
+                        <input type="radio" class="btn-check" name="hallFilter" id="seeking" autocomplete="off">
+                        <label class="btn btn-outline-success" for="seeking">尋找對手</label>
+                        
+                        <input type="radio" class="btn-check" name="hallFilter" id="discussion" autocomplete="off">
+                        <label class="btn btn-outline-info" for="discussion">一般討論</label>
+                    </div>
+                </div>
+                <div class="card-body" style="height: 500px; overflow-y: auto;">
+                    <!-- 發言輸入區 -->
+                    {% if session.get('user_id') %}
+                    <div class="border rounded p-3 mb-4 bg-light">
+                        <form method="POST" action="{{ url_for('main.post_hall_message') }}">
+                            <div class="mb-3">
+                                <textarea class="form-control" name="message" placeholder="在辯手大廳發言..." rows="3" required></textarea>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="message_type" id="general" value="general" checked>
+                                    <label class="form-check-label" for="general">一般討論</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="message_type" id="challenge" value="challenge">
+                                    <label class="form-check-label" for="challenge">尋找對手</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary">發送</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    <!-- 大廳訊息列表 -->
+                    <div id="hallMessages">
+                        {% for message in hall_messages %}
+                        <div class="message-item mb-3 {% if message.type == 'challenge' %}border-start border-4 border-success ps-3{% endif %}">
+                            <div class="d-flex align-items-start">
+                                <div class="avatar me-3">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        {{ message.user.username[0] }}
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <h6 class="mb-0 me-2">{{ message.user.username }}</h6>
+                                        <span class="badge bg-info me-2">Lv.{{ message.user.level or 1 }}</span>
+                                        {% if message.type == 'challenge' %}
+                                            <span class="badge bg-success">尋找對手</span>
+                                        {% endif %}
+                                        <small class="text-muted ms-auto">{{ message.created_at.strftime('%H:%M') }}</small>
+                                    </div>
+                                    <p class="mb-2">{{ message.content }}</p>
+                                    {% if message.type == 'challenge' and session.get('user_id') and session.get('user_id') != message.user_id %}
+                                    <button class="btn btn-sm btn-success" onclick="acceptChallenge({ messageId: message.id })">
+                                    <!--<button class="btn btn-sm btn-success" onclick="acceptChallenge({{ message.id }})">-->
+                                        <i class="fas fa-handshake me-1"></i>接受挑戰
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側邊欄 - 快速資訊 -->
+        <div class="col-lg-3">
+            <!-- 我的狀態 -->
+            {% if session.get('user_id') %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">我的狀態</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" 
+                             style="width: 60px; height: 60px; font-size: 24px;">
+                            {{ current_user.username[0] if current_user else 'U' }}
+                        </div>
+                        <h6>{{ current_user.username if current_user else '訪客' }}</h6>
+                        <span class="badge bg-info">Lv.{{ current_user.level or 1 }}</span>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h6 class="text-primary">{{ current_user.total_debates or 0 }}</h6>
+                            <small class="text-muted">總辯論</small>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="text-success">{{ current_user.wins or 0 }}</h6>
+                            <small class="text-muted">勝場</small>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="text-warning">{{ current_user.rating or 1200 }}</h6>
+                            <small class="text-muted">評分</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 辯論邀請 -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">快速辯論</h6>
+                    <i class="fas fa-bolt text-warning"></i>
+                </div>
+                <div class="card-body">
+                    {% if session.get('user_id') %}
+                    <button class="btn btn-success btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#quickDebateModal">
+                        <i class="fas fa-plus me-1"></i>發起新辯論
+                    </button>
+                    <button class="btn btn-outline-info btn-sm w-100" onclick="findRandomOpponent()">
+                        <i class="fas fa-random me-1"></i>隨機配對
+                    </button>
+                    {% else %}
+                    <p class="text-muted small mb-2">登入後即可參與辯論</p>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-sm w-100">
+                        立即登入
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 即時通知 -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">即時通知</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for notification in recent_notifications %}
+                        <div class="list-group-item border-0 py-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-{{ notification.icon }} text-{{ notification.type }} me-2"></i>
+                                <div class="flex-grow-1">
+                                    <small>{{ notification.message }}</small>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        {{ notification.time_ago }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="list-group-item border-0 py-3 text-center text-muted">
+                            <small>暫無新通知</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 快速辯論 Modal -->
+<div class="modal fade" id="quickDebateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">發起快速辯論</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.create_debate') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="debateTitle" class="form-label">辯論主題</label>
+                        <input type="text" class="form-control" id="debateTitle" name="title" 
+                               placeholder="例：AI是否會取代人類工作？" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="debatePosition" class="form-label">我的立場</label>
+                        <select class="form-select" id="debatePosition" name="position" required>
+                            <option value="">選擇立場</option>
+                            <option value="pro">正方（支持）</option>
+                            <option value="con">反方（反對）</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="debateCategory" class="form-label">分類</label>
+                        <select class="form-select" id="debateCategory" name="category" required>
+                            <option value="科技">科技</option>
+                            <option value="社會">社會</option>
+                            <option value="環境">環境</option>
+                            <option value="政治">政治</option>
+                            <option value="教育">教育</option>
+                            <option value="經濟">經濟</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="timeLimit" class="form-label">每輪時限</label>
+                        <select class="form-select" id="timeLimit" name="time_limit">
+                            <option value="24">24小時</option>
+                            <option value="12">12小時</option>
+                            <option value="6">6小時</option>
+                            <option value="3">3小時</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">發起辯論</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// 自動刷新大廳訊息
+setInterval(function() {
+    // 使用 AJAX 更新訊息列表
+    fetch('{{ url_for("main.get_hall_messages") }}')
+        .then(response => response.json())
+        .then(data => {
+            // 更新訊息列表
+            document.getElementById('hallMessages').innerHTML = data.html;
+        })
+        .catch(error => console.log('更新失敗'));
+}, 30000); // 30秒更新一次
+
+// 接受挑戰
+function acceptChallenge(messageId) {
+    if (confirm('確定要接受這個辯論挑戰嗎？')) {
+        fetch('{{ url_for("main.accept_challenge") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({message_id: messageId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('挑戰接受成功！正在跳轉到辯論頁面...');
+                window.location.href = data.debate_url;
+            } else {
+                alert('接受挑戰失敗：' + data.message);
+            }
+        });
+    }
+}
+
+// 隨機配對
+function findRandomOpponent() {
+    if (confirm('系統將為您尋找合適的對手進行隨機辯論，確定繼續？')) {
+        fetch('{{ url_for("main.find_random_opponent") }}', {method: 'POST'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('找到對手！正在跳轉到辯論頁面...');
+                window.location.href = data.debate_url;
+            } else {
+                alert(data.message || '目前沒有可配對的對手，請稍後再試');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

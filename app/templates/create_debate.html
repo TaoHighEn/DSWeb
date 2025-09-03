@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block title %}發起新辯論 - 懂事論壇{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- 頁面標題 -->
+            <div class="text-center mb-5">
+                <div class="hero-icon mb-3">
+                    <i class="fas fa-lightbulb text-warning" style="font-size: 3rem;"></i>
+                </div>
+                <h1 class="display-5 fw-bold text-primary">發起新辯論</h1>
+                <p class="lead text-muted">分享你的觀點，邀請他人參與理性討論</p>
+            </div>
+
+            <!-- 辯論表單 -->
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>辯論詳情</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('main.create_debate') }}" id="debateForm">
+                        <!-- 辯論主題 -->
+                        <div class="mb-4">
+                            <label for="debateTitle" class="form-label fw-bold">
+                                辯論主題 <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control form-control-lg" 
+                                   id="debateTitle" name="title" 
+                                   placeholder="例：AI人工智慧是否會造成大規模失業？" 
+                                   required maxlength="200">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle text-primary"></i>
+                                建議使用問句形式，讓議題更明確且容易討論
+                            </div>
+                            <div class="character-count mt-1">
+                                <small class="text-muted">
+                                    <span id="titleCount">0</span>/200 字
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- 議題說明 -->
+                        <div class="mb-4">
+                            <label for="debateDescription" class="form-label fw-bold">議題說明</label>
+                            <textarea class="form-control" id="debateDescription" 
+                                      name="description" rows="5" maxlength="1000"
+                                      placeholder="詳細說明辯論的背景、定義、範圍等...&#10;&#10;例如：&#10;- 討論範圍：僅限一般性工作，不包含創意性工作&#10;- 時間範圍：未來10年內&#10;- 參考資料：可引用相關研究報告"></textarea>
+                            <div class="form-text">
+                                <i class="fas fa-lightbulb text-warning"></i>
+                                清楚的議題說明有助於提升辯論品質
+                            </div>
+                            <div class="character-count mt-1">
+                                <small class="text-muted">
+                                    <span id="descCount">0</span>/1000 字
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- 分類與立場 -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="debateCategory" class="form-label fw-bold">
+                                    主題分類 <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="debateCategory" name="category" required>
+                                    <option value="">請選擇分類</option>
+                                    <option value="科技">🔬 科技創新</option>
+                                    <option value="社會">🏛️ 社會議題</option>
+                                    <option value="環境">🌍 環境永續</option>
+                                    <option value="政治">⚖️ 政治制度</option>
+                                    <option value="教育">📚 教育學習</option>
+                                    <option value="經濟">💰 經濟發展</option>
+                                    <option value="文化">🎭 文化藝術</option>
+                                    <option value="健康">🏥 健康醫療</option>
+                                    <option value="其他">📋 其他議題</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="myPosition" class="form-label fw-bold">
+                                    我的立場 <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="myPosition" name="position" required>
+                                    <option value="">請選擇立場</option>
+                                    <option value="pro">👍 正方（支持該議題）</option>
+                                    <option value="con">👎 反方（反對該議題）</option>
+                                </select>
+                                <div class="form-text">
+                                    <i class="fas fa-balance-scale text-info"></i>
+                                    選擇後將等待持相反立場的對手
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 辯論設定 -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>辯論設定</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="timeLimit" class="form-label">每輪發言時限</label>
+                                        <select class="form-select" id="timeLimit" name="time_limit">
+                                            <option value="24" selected>24小時（推薦）</option>
+                                            <option value="12">12小時</option>
+                                            <option value="6">6小時（快節奏）</option>
+                                            <option value="3">3小時（極速辯論）</option>
+                                        </select>
+                                        <div class="form-text">超時將被視為棄權</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="levelLimit" class="form-label">參與者等級限制</label>
+                                        <select class="form-select" id="levelLimit" name="level_limit">
+                                            <option value="" selected>不限制（推薦）</option>
+                                            <option value="beginner">新手友善 (Lv.1-5)</option>
+                                            <option value="intermediate">進階辯手 (Lv.6-15)</option>
+                                            <option value="advanced">專家級別 (Lv.16+)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 辯論規則 -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">辯論規則</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="needSources" name="need_sources" checked>
+                                        <label class="form-check-label" for="needSources">
+                                            <strong>強制提供資料來源</strong>
+                                            <div class="text-muted small">所有論述必須附上可信來源連結</div>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="allowAudience" name="allow_audience" checked>
+                                        <label class="form-check-label" for="allowAudience">
+                                            <strong>允許觀眾評論</strong>
+                                            <div class="text-muted small">觀眾可以對辯論進行評論，但不影響結果</div>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="enableJudging" name="enable_judging" checked>
+                                        <label class="form-check-label" for="enableJudging">
+                                            <strong>啟用評審制度</strong>
+                                            <div class="text-muted small">由資深用戶評判辯論勝負</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 預期效益 -->
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-star me-2"></i>發起辯論的好處
+                            </h6>
+                            <ul class="mb-0">
+                                <li>獲得辯論經驗值，提升等級</li>
+                                <li>培養批判思考與論述能力</li>
+                                <li>與不同觀點的人進行理性交流</li>
+                                <li>建立個人辯論聲譽</li>
+                            </ul>
+                        </div>
+
+                        <!-- 提交按鈕 -->
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                <i class="fas fa-rocket me-2"></i>發起辯論
+                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary flex-fill" 
+                                        onclick="saveDraft()">
+                                    <i class="fas fa-save me-2"></i>儲存草稿
+                                </button>
+                                <a href="{{ url_for('main.debate_board') }}" 
+                                   class="btn btn-outline-primary flex-fill">
+                                    <i class="fas fa-arrow-left me-2"></i>返回看板
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 辯論技巧提示 -->
+            <div class="card mt-4 border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-graduation-cap text-primary me-2"></i>辯論技巧小貼士
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>主題要具體明確</li>
+                                <li><i class="fas fa-check text-success me-2"></i>提供充分背景資訊</li>
+                                <li><i class="fas fa-check text-success me-2"></i>保持客觀中立態度</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>準備可信資料來源</li>
+                                <li><i class="fas fa-check text-success me-2"></i>尊重對手觀點</li>
+                                <li><i class="fas fa-check text-success me-2"></i>邏輯清晰有條理</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.card {
+    border-radius: 15px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #2c5aa0;
+    box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+}
+
+.character-count {
+    text-align: right;
+}
+
+.form-check-input:checked {
+    background-color: #2c5aa0;
+    border-color: #2c5aa0;
+}
+
+#submitBtn {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+#submitBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+</style>
+
+<script>
+// 字數統計
+document.getElementById('debateTitle').addEventListener('input', function() {
+    const count = this.value.length;
+    document.getElementById('titleCount').textContent = count;
+    
+    if (count > 180) {
+        document.getElementById('titleCount').parentElement.classList.add('text-warning');
+    } else if (count > 200) {
+        document.getElementById('titleCount').parentElement.classList.add('text-danger');
+    } else {
+        document.getElementById('titleCount').parentElement.classList.remove('text-warning', 'text-danger');
+    }
+});
+
+document.getElementById('debateDescription').addEventListener('input', function() {
+    const count = this.value.length;
+    document.getElementById('descCount').textContent = count;
+    
+    if (count > 800) {
+        document.getElementById('descCount').parentElement.classList.add('text-warning');
+    } else if (count > 1000) {
+        document.getElementById('descCount').parentElement.classList.add('text-danger');
+    } else {
+        document.getElementById('descCount').parentElement.classList.remove('text-warning', 'text-danger');
+    }
+});
+
+// 表單驗證
+document.getElementById('debateForm').addEventListener('submit', function(e) {
+    const title = document.getElementById('debateTitle').value.trim();
+    const category = document.getElementById('debateCategory').value;
+    const position = document.getElementById('myPosition').value;
+    
+    if (!title) {
+        alert('請輸入辯論主題');
+        e.preventDefault();
+        return false;
+    }
+    
+    if (title.length < 10) {
+        alert('辯論主題至少需要10個字元');
+        e.preventDefault();
+        return false;
+    }
+    
+    if (!category) {
+        alert('請選擇主題分類');
+        e.preventDefault();
+        return false;
+    }
+    
+    if (!position) {
+        alert('請選擇你的立場');
+        e.preventDefault();
+        return false;
+    }
+    
+    // 顯示提交中狀態
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>發起中...';
+    submitBtn.disabled = true;
+});
+
+// 儲存草稿功能
+function saveDraft() {
+    const formData = {
+        title: document.getElementById('debateTitle').value,
+        description: document.getElementById('debateDescription').value,
+        category: document.getElementById('debateCategory').value,
+        position: document.getElementById('myPosition').value,
+        time_limit: document.getElementById('timeLimit').value,
+        level_limit: document.getElementById('levelLimit').value
+    };
+    
+    localStorage.setItem('debate_draft', JSON.stringify(formData));
+    alert('草稿已儲存！');
+}
+
+// 載入草稿
+window.addEventListener('load', function() {
+    const draft = localStorage.getItem('debate_draft');
+    if (draft) {
+        const data = JSON.parse(draft);
+        
+        if (confirm('發現已儲存的草稿，是否要載入？')) {
+            document.getElementById('debateTitle').value = data.title || '';
+            document.getElementById('debateDescription').value = data.description || '';
+            document.getElementById('debateCategory').value = data.category || '';
+            document.getElementById('myPosition').value = data.position || '';
+            document.getElementById('timeLimit').value = data.time_limit || '24';
+            document.getElementById('levelLimit').value = data.level_limit || '';
+            
+            // 觸發字數統計
+            document.getElementById('debateTitle').dispatchEvent(new Event('input'));
+            document.getElementById('debateDescription').dispatchEvent(new Event('input'));
+        }
+    }
+});
+
+// 表單提交成功後清除草稿
+window.addEventListener('beforeunload', function() {
+    const form = document.getElementById('debateForm');
+    if (form.checkValidity()) {
+        localStorage.removeItem('debate_draft');
+    }
+});
+</script>
+{% endblock %}

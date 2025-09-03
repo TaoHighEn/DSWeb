@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="text-align:center;padding:60px 20px;">
+  <h1 style="font-size:48px;margin-bottom:10px;">404</h1>
+  <p style="color:#666;margin-bottom:30px;">找不到您要的頁面</p>
+  <a href="{{ url_for('index') }}" style="display:inline-block;padding:10px 20px;background:#667eea;color:#fff;border-radius:8px;text-decoration:none;">回到首頁</a>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% for message in hall_messages %}
+<div class="message-item mb-3 {% if message.message_type == 'challenge' %}border-start border-4 border-success ps-3{% endif %}">
+    <div class="d-flex align-items-start">
+        <div class="avatar me-3">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                 style="width: 40px; height: 40px;">
+                {{ message.user.username[0] }}
+            </div>
+        </div>
+        <div class="flex-grow-1">
+            <div class="d-flex align-items-center mb-1">
+                <h6 class="mb-0 me-2">{{ message.user.username }}</h6>
+                <span class="badge bg-info me-2">Lv.{{ message.user.stats.level if message.user.stats else 1 }}</span>
+                {% if message.message_type == 'challenge' %}
+                    <span class="badge bg-success">尋找對手</span>
+                {% endif %}
+                <small class="text-muted ms-auto">{{ message.created_at.strftime('%H:%M') }}</small>
+            </div>
+            <p class="mb-2">{{ message.content }}</p>
+            {% if message.message_type == 'challenge' and session.get('user_id') and session.get('user_id') != message.user_id %}
+            <button class="btn btn-sm btn-success" onclick="acceptChallenge({ messageId: message.id })">
+                <i class="fas fa-handshake me-1"></i>接受挑戰
+            </button>
+            <!--
+            <button class="btn btn-sm btn-success" onclick="acceptChallenge({{ message.id }})">
+                <i class="fas fa-handshake me-1"></i>接受挑戰
+            </button>
+            -->
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endfor %}

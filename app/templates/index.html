@@ -3,99 +3,390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSWeb - 歡迎頁面</title>
+    <title>懂事論壇 DSWeb - 理性辯論平台</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+        :root {
+            --primary-color: #2c5aa0;
+            --secondary-color: #f8f9fa;
+            --accent-color: #ff6b35;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1e3a8a 100%);
+            color: white;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%23FFFFFF"></path></svg>') no-repeat;
+            background-size: cover;
+        }
+        
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 20px;
         }
-        .container {
+        
+        .stats-section {
+            background: var(--secondary-color);
+            padding: 60px 0;
+        }
+        
+        .debate-preview {
+            border-left: 4px solid var(--primary-color);
             background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-        }
-        p {
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            margin: 10px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
+            border-radius: 8px;
             transition: all 0.3s ease;
+        }
+        
+        .debate-preview:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left-color: var(--accent-color);
+        }
+        
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+        }
+        
+        .btn-debate {
+            background: linear-gradient(45deg, var(--accent-color), #ff8c42);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
             font-weight: bold;
+            transition: all 0.3s ease;
         }
-        .btn:hover {
+        
+        .btn-debate:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        .features {
-            margin-top: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        .feature {
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-        }
-        .feature h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .feature p {
-            color: #666;
-            font-size: 0.9em;
-            margin: 0;
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 DSWeb</h1>
-        <p>欢迎来到 DSWeb 项目！这是一个基于 Flask 的现代化 Web 应用程序。</p>
-        
-        <div class="features">
-            <div class="feature">
-                <h3>🔐 用户认证</h3>
-                <p>支持 LINE OAuth 登录，安全可靠</p>
-            </div>
-            <div class="feature">
-                <h3>💾 数据管理</h3>
-                <p>使用 SQLAlchemy 进行数据库操作</p>
-            </div>
-            <div class="feature">
-                <h3>🎨 响应式设计</h3>
-                <p>现代化的用户界面，支持各种设备</p>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">
+                <i class="fas fa-comments me-2"></i>懂事論壇 DSWeb
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('main.index') }}">
+                            <i class="fas fa-home me-1"></i>首頁
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.debate_hall') }}">
+                            <i class="fas fa-users me-1"></i>辯手大廳
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.debate_board') }}">
+                            <i class="fas fa-clipboard-list me-1"></i>辯論看板
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if session.get('user_id') %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>我的帳戶
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">個人資料</a></li>
+                                <li><a class="dropdown-item" href="#">我的辯論</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">登出</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>登入
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
+    </nav>
 
-        <div style="margin-top: 30px;">
-            <a href="{{ url_for('auth.login') }}" class="btn">登录系统</a>
-            <a href="{{ url_for('auth.profile') }}" class="btn">查看个人资料</a>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">
+                        理性辯論，<br>
+                        <span class="text-warning">智慧交鋒</span>
+                    </h1>
+                    <p class="lead mb-4">
+                        透過結構化的辯論機制，促進高品質的公共議題討論。<br>
+                        在這裡，每個觀點都值得被聆聽，每個論證都需要有憑有據。
+                    </p>
+                    <div class="d-flex gap-3">
+                        {% if not session.get('user_id') %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-debate btn-lg text-white">
+                                <i class="fas fa-rocket me-2"></i>立即加入辯論
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('main.debate_board') }}" class="btn btn-debate btn-lg text-white">
+                                <i class="fas fa-fire me-2"></i>參與熱門辯論
+                            </a>
+                        {% endif %}
+                        <a href="#features" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-info-circle me-2"></i>了解更多
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <div class="position-relative">
+                        <i class="fas fa-balance-scale display-1 text-warning opacity-75"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- 統計數據 -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <h2 class="display-5 fw-bold text-primary">1,245</h2>
+                    <p class="text-muted">活躍辯手</p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-5 fw-bold text-success">567</h2>
+                    <p class="text-muted">進行中辯論</p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-5 fw-bold text-info">2,890</h2>
+                    <p class="text-muted">已完成辯論</p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-5 fw-bold text-warning">15,234</h2>
+                    <p class="text-muted">論證發言</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 平台特色 -->
+    <section id="features" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">平台特色</h2>
+                <p class="lead text-muted">打造台灣最專業的線上辯論平台</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="feature-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h4>24小時限時機制</h4>
+                        <p class="text-muted">每輪發言設有24小時時限，確保辯論節奏緊湊，避免拖延戰術</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="feature-icon bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h4>強制資料查證</h4>
+                        <p class="text-muted">所有論述必須提供可信來源，杜絕空口白話，提升討論品質</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="feature-icon bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h4>專業評審制度</h4>
+                        <p class="text-muted">由資深用戶擔任評審，公正評判辯論勝負，建立信譽體系</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="feature-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h4>遊戲化等級系統</h4>
+                        <p class="text-muted">透過積分、等級、徽章系統，激勵用戶持續參與高品質辯論</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="feature-icon bg-danger bg-opacity-10 text-danger">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>反騷擾機制</h4>
+                        <p class="text-muted">嚴格規範發言品質，自動檢測不當言論，維護友善辯論環境</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="feature-icon bg-purple bg-opacity-10" style="color: #6f42c1;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4>數據分析儀表板</h4>
+                        <p class="text-muted">完整的辯論數據分析，追蹤個人成長軌跡與辯論趨勢</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 熱門辯論預覽 -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="display-6 fw-bold">熱門辯論</h2>
+                    <p class="text-muted mb-0">當前最受關注的辯論議題</p>
+                </div>
+                <a href="{{ url_for('main.debate_board') }}" class="btn btn-primary">
+                    查看所有辯論 <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="row g-4">
+                <!-- 示例辯論主題 -->
+                <div class="col-lg-6">
+                    <div class="debate-preview p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-primary">科技議題</span>
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>128人關注
+                            </small>
+                        </div>
+                        <h5 class="fw-bold mb-2">AI人工智慧是否會造成大規模失業？</h5>
+                        <p class="text-muted mb-3">探討人工智慧技術發展對就業市場的衝擊，以及社會應如何因應...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <small class="text-success">
+                                        <i class="fas fa-thumbs-up me-1"></i>正方 45%
+                                    </small>
+                                </div>
+                                <div>
+                                    <small class="text-danger">
+                                        <i class="fas fa-thumbs-down me-1"></i>反方 55%
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted">2天前發起</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="debate-preview p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-success">環境議題</span>
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>95人關注
+                            </small>
+                        </div>
+                        <h5 class="fw-bold mb-2">台灣應該加速廢核還是延役核電？</h5>
+                        <p class="text-muted mb-3">在能源轉型的關鍵時刻，核能政策的選擇將影響台灣未來...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <small class="text-success">
+                                        <i class="fas fa-thumbs-up me-1"></i>正方 62%
+                                    </small>
+                                </div>
+                                <div>
+                                    <small class="text-danger">
+                                        <i class="fas fa-thumbs-down me-1"></i>反方 38%
+                                    </small>
+                                </div>
+                            </div>
+                            <small class="text-muted">1天前發起</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    想要參與辯論？
+                    {% if not session.get('user_id') %}
+                        <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-bold">立即註冊</a>
+                    {% else %}
+                        <a href="{{ url_for('main.debate_board') }}" class="text-decoration-none fw-bold">前往辯論看板</a>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>懂事論壇 DSWeb</h5>
+                    <p class="text-muted">台灣最專業的線上辯論平台</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">© 2025 DSWeb. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
