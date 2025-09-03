@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 from datetime import datetime, timedelta
 from app import db
 from app.models.user import User
-from app.models.debate import Debate, HallMessage
+from app.models.debate import Debate, HallMessage, Argument
 from sqlalchemy import func, desc, or_
 
 main_bp = Blueprint('main', __name__)
@@ -194,13 +194,17 @@ def debate_detail(debate_id):
     debate = Debate.query.get_or_404(debate_id)
     
     # 增加觀看次數
-    if not debate.views:
-        debate.views = 1
-    else:
-        debate.views += 1
+    debate.views = (debate.views or 0) + 1
     db.session.commit()
     
-    return render_template('debate_detail.html', debate=debate)
+    # 這裡把論述依照 created_at 排序好
+    arguments = debate.arguments.order_by(Argument.created_at.desc()).all()
+    
+    return render_template(
+        'debate_detail.html',
+        debate=debate,
+        arguments=arguments  # 傳給 template
+    )
 
 @main_bp.route('/debate-hall')
 def debate_hall():

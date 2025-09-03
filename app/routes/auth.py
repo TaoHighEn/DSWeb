@@ -146,4 +146,4 @@ def profile():
 def logout():
     session.pop("user_id", None)
     flash("已成功登出", "info")
-    return redirect(url_for("index"))
+    return redirect(url_for("main.index"))
