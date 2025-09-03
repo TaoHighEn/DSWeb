@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSWeb - 歡迎頁面</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .features {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .feature {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .feature h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .feature p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 DSWeb</h1>
+        <p>欢迎来到 DSWeb 项目！这是一个基于 Flask 的现代化 Web 应用程序。</p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🔐 用户认证</h3>
+                <p>支持 LINE OAuth 登录，安全可靠</p>
+            </div>
+            <div class="feature">
+                <h3>💾 数据管理</h3>
+                <p>使用 SQLAlchemy 进行数据库操作</p>
+            </div>
+            <div class="feature">
+                <h3>🎨 响应式设计</h3>
+                <p>现代化的用户界面，支持各种设备</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('auth.login') }}" class="btn">登录系统</a>
+            <a href="{{ url_for('auth.profile') }}" class="btn">查看个人资料</a>
+        </div>
+    </div>
+</body>
+</html>
